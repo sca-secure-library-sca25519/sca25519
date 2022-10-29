@@ -90,7 +90,7 @@ To help reproduce the side-channel evaluation, for each of the implementations w
 
 The first byte of the attached data to each trace indicates the TVLA set (0 - fixed, 1 - random input and fixed key, and 2 fixed input and random key). The rest of the data correspond to the input point and the used scalar. 
 
-# Format
+## Format
 
 Each trace set is in the TRS format that is described under the following links:
 https://github.com/Riscure/python-trsfile

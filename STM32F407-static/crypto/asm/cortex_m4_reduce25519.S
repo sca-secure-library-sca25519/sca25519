@@ -1,0 +1,1 @@
+../../../common/crypto/asm/cortex_m4_reduce25519.S

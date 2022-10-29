@@ -1,0 +1,1 @@
+../../../common/crypto/asm/cortex_m4_add_fe25519.S

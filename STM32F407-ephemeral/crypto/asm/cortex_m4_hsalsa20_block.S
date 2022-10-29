@@ -1,0 +1,1 @@
+../../../common/crypto/asm/cortex_m4_hsalsa20_block.S

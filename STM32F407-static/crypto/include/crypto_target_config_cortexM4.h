@@ -1,0 +1,1 @@
+../../../common/crypto/include/crypto_target_config_cortexM4.h
