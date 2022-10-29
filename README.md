@@ -1,4 +1,4 @@
-# The sca25519 library (SCA-secure ECC in software – mission impossible?)
+# The sca25519 library ("SCA-secure ECC in software – mission impossible?")
 
 This repository accompanies the paper **SCA-secure ECC in software – mission impossible?** available at https://tches.iacr.org/.
 
@@ -86,7 +86,7 @@ The resulting comparison of traces corresponding to all three implementations is
 
 The scalar multiplications are marked in red. 
 
-To help reproduce the side-channel evaluation, for each of the implementations we upload 100 traces under the following link: https://www.dropbox.com/scl/fo/3zjd5m4oc77c5qgob7kxf/h?dl=0&rlkey=59774fmckgv5k8z87dbk7gpqk
+To help reproduce the side-channel evaluation, for each of the implementations we upload 100 traces under the following link: https://www.dropbox.com/scl/fo/3zjd5m4oc77c5qgob7kxf/h?dl=0&rlkey=59774fmckgv5k8z87dbk7gpqk.
 
 The first byte of the attached data to each trace indicates the TVLA set (0 - fixed, 1 - random input and fixed key, and 2 fixed input and random key). The rest of the data correspond to the input point and the used scalar. 
 
