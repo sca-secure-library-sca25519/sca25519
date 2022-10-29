@@ -1,4 +1,4 @@
-# Introduction to the sca25519 library (SCA-secure ECC in software – mission impossible?)
+# The sca25519 library (SCA-secure ECC in software – mission impossible?)
 
 This repository accompanies the paper **SCA-secure ECC in software – mission impossible?** available at https://tches.iacr.org/.
 
@@ -79,11 +79,16 @@ The following flags are relevant and can be used for performance evaluation:
 
 As mentioned in the paper we run our side-channel experiments using a modified Cortex-M4 (several capacitors are removed) on an STM32F407IGT6 board clocked at 168MHz. 
 The resulting comparison of traces corresponding to all three implementations is present below: 
+![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/EphemeralSM_mark2.png?raw=true "Ephemeral Implementation")
+![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/StaticSM_mark2.png?raw=true "Static Implementation")
+![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/UnprotectedSM_mark2.png?raw=true "Unprotected Implementation")
 
-To help reproduce the side-channel evaluation, for each of the implementations we upload 100 traces under the following links: 
-- for the ephemeral X25519;
-- for the static X25519;
-- for the unprotected X25519. 
+
+The scalar multiplications are marked in red. 
+
+To help reproduce the side-channel evaluation, for each of the implementations we upload 100 traces under the following link: https://www.dropbox.com/scl/fo/3zjd5m4oc77c5qgob7kxf/h?dl=0&rlkey=59774fmckgv5k8z87dbk7gpqk
+
+The first byte of the attached data to each trace indicates the TVLA set (0 - fixed, 1 - random input and fixed key, and 2 fixed input and random key). The rest of the data correspond to the input point and the used scalar. 
 
 # Format
 
