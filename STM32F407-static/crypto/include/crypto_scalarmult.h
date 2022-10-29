@@ -11,6 +11,11 @@
 #define crypto_scalarmult_BYTES 32
 #define crypto_scalarmult_SCALARBYTES 32
 
+//#define COUNT_CYCLES_EXTRA_SM
+#ifdef COUNT_CYCLES_EXTRA_SM
+extern    unsigned long long globalcount;
+#endif
+
 /*  This a haeder for scalarmult_25519.c, this is spearate from ephemeral and unprotected cases, because the scalar and 
     secret state data need to be loaded once before usage. Therefore scalar multiplication does not take the scalar as 
     parameter from the user. */

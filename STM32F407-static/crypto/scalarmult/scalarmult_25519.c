@@ -4,6 +4,8 @@
 #include "../include/crypto_scalarmult.h"
 #include "../../stm32wrapper.h"
 
+#include <limits.h>
+
 #define MULTIPLICATIVE_CSWAP
 #define ITOH_COUNTERMEASURE
 #define ITOH_COUNTERMEASURE64
@@ -13,6 +15,10 @@
 //static uint8_t fixed = 0;
 #define UPDATABLE_STATIC_SCALAR
 #define SCALAR_RANDOMIZATION
+
+#ifdef COUNT_CYCLES_EXTRA_SM
+unsigned long long globalcount;
+#endif
 
 typedef struct _ST_curve25519ladderstepWorkingState
 {
@@ -523,7 +529,14 @@ void update_static_key_curve25519() {
 #ifdef UPDATABLE_STATIC_SCALAR
    	sc25519 newBlindingFactor, newBlindingFactorInverse;
     fe25519_setzero(&newBlindingFactor);
-   	randombytes(newBlindingFactor.as_uint8_t, 8);
+
+    //Lukasz: new code so newBlindingFactor is not 0
+    //unsigned long long;
+    do {
+   	    randombytes(newBlindingFactor.as_uint8_t, 8);
+    } while (! newBlindingFactor.as_64_bitValue_t[0].as_uint64_t[0]);
+    //! fe25519_iszero(&newBlindingFactor)
+
     fe25519 t, randB;
     UN_512bitValue randVal;
     randombytes(randVal.as_uint8_t, 64);
@@ -627,7 +640,13 @@ crypto_scalarmult_curve25519(
 #ifdef SCALAR_RANDOMIZATION
     fe25519 t, Rinv, randB;
     fe25519_setzero((fe25519*) &state.r);
-    randombytes(state.r.as_uint8_t, 8);
+
+    //Lukasz: new modification is added so there is 0 chosen for r
+    do {
+        randombytes(state.r.as_uint8_t, 8);
+    } while (! state.r.as_64_bitValue_t[0].as_uint64_t[0]);
+    //! fe25519_iszero(&state.r)
+
     randombytes(randVal.as_uint8_t, 64);
     fe25519_reduceTo256Bits(&randB, &randVal);
     
@@ -769,10 +788,14 @@ crypto_scalarmult_curve25519(
 
     // ----------------------------------------------------------
 
+
+#ifdef COUNT_CYCLES_EXTRA_SM
+    /*Start cycle count*/
     SCS_DEMCR |= SCS_DEMCR_TRCENA;
     DWT_CYCCNT = 0;
     DWT_CTRL |= DWT_CTRL_CYCCNTENA;
     unsigned int oldcount = DWT_CYCCNT;
+#endif
 
     computeY_curve25519_projective(&y0, &state.xp, &state.zp, &state.xq, &state.zq, &state.x0, &yp);
 
@@ -911,11 +934,12 @@ crypto_scalarmult_curve25519(
         state.nextScalarBitToProcess --;
     }
 
+    /*Comment out cycle counts*/
+#ifdef COUNT_CYCLES_EXTRA_SM
+    unsigned int newcount = DWT_CYCCNT;
+    globalcount += (newcount-oldcount); 
+#endif
 
-    unsigned int newcount = DWT_CYCCNT-oldcount;
-    char str[100];
-    sprintf(str, "Cost additional 64-bits: %d", newcount);
-    send_USART_str((unsigned char*) str);
     // ----------------------------------------------------------
     // Compute y1
     computeY_curve25519_projective(&yp, &state.xp, &state.zp, &state.xq, &state.zq, &state.x0, &y0);
@@ -974,12 +998,12 @@ void cycles_cswap() {
 
     int i;
     unsigned int oldcount = DWT_CYCCNT;
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < 1000; i++) {
       maskScalarBitsWithRandomAndCswap(&state, wordwithbit, bitnum);
     }
     unsigned int newcount = DWT_CYCCNT-oldcount;
 
     char str[100];
-    sprintf(str, "Cost cswap: %d", newcount / 100);
+    sprintf(str, "Cost cswap: %d", newcount / 1000);
     send_USART_str((unsigned char*) str);
 }

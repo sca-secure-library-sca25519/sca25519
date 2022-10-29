@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include "main.h"
 
+//#define COUNT_CYCLES_EXTRA_SM
+//#ifdef COUNT_CYCLES_EXTRA_SM
+//extern unsigned long long globalcount;
+//#endif
+
 // blinded key prepared by user
 UN_256bitValue ustatic_key = {{0x1b, 0xc7, 0x9e, 0xf8, 0xe8, 0x24, 0xb2, 0x7a, 
                               0x9d, 0xc5, 0x9b, 0x41, 0x63, 0x5a, 0x9c, 0x9d, 
@@ -46,15 +51,19 @@ void cycles_updatekey() {
 
     int i;
     unsigned int oldcount = DWT_CYCCNT;
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < 1000; i++) {
       update_static_key_curve25519();
     }
     unsigned int newcount = DWT_CYCCNT-oldcount;
 
     char str[100];
-    sprintf(str, "Cost update static key: %d", newcount / 100);
+    sprintf(str, "Cost update static key: %d", newcount / 1000);
     send_USART_str((unsigned char*) str);
 }
+
+#define MAX 10000
+//COUNT_CYCLES_EXTRA_SM needs to be (or not) defined in crypto_scalarmult.h
+// by defaiult it is not defined
 
 int main(void)
 {
@@ -66,10 +75,6 @@ int main(void)
 
     send_USART_str((unsigned char*)"Program Started.");
 
-    SCS_DEMCR |= SCS_DEMCR_TRCENA;
-    DWT_CYCCNT = 0;
-    DWT_CTRL |= DWT_CTRL_CYCCNTENA;
-
     set_static_key_curve25519(  uRx.as_uint8_t, uRy.as_uint8_t, uRz.as_uint8_t, uSx.as_uint8_t, 
                                 uSy.as_uint8_t, uSz.as_uint8_t, ustatic_key.as_uint8_t, ublindingFactor.as_uint8_t); 
 
@@ -77,16 +82,40 @@ int main(void)
     sprintf(str, "Test point: %d", retval);
     send_USART_str((unsigned char*) str);
 
+    //to avoid overflows we perform MAX^2 scalar multiplications and we avarage. So it will be 10000 total executions here. 
     uint8_t result[32];
     int i;
-    unsigned int oldcount = DWT_CYCCNT;
-    for (i = 0; i < 100; i++) {
+    unsigned int oldcount, newcount;
+    unsigned long long totalcountNumber = 0;
+
+#ifdef COUNT_CYCLES_EXTRA_SM
+    globalcount = 0;
+    for (i = 0; i < MAX; i++) {
         crypto_scalarmult_base_curve25519(result /*static_key.as_uint8_t*/);
     }
-    unsigned int newcount = DWT_CYCCNT-oldcount;
-
-    sprintf(str, "Cost scalarmult base: %d", newcount / 100);
+    sprintf(str, "Cost additional 64-bits: %d", globalcount/MAX);
     send_USART_str((unsigned char*) str);
+#else
+    SCS_DEMCR |= SCS_DEMCR_TRCENA;
+    DWT_CYCCNT = 0;
+    DWT_CTRL |= DWT_CTRL_CYCCNTENA;
+
+    for (i = 0; i < MAX; /*i++*/) {
+        oldcount = DWT_CYCCNT;
+        crypto_scalarmult_base_curve25519(result /*static_key.as_uint8_t*/);
+        newcount = DWT_CYCCNT;
+        if (newcount < oldcount) {
+            sprintf(str, "Clock Overflown");
+            send_USART_str((unsigned char*) str);
+        }
+        else  {
+            totalcountNumber+= ((long long)newcount - (long long)oldcount); 
+            i++;
+        }
+    }
+    sprintf(str, "Cost scalarmult base: %d", totalcountNumber / MAX);
+    send_USART_str((unsigned char*) str);
+#endif
 
     cycles_cswap();
     cycles_updatekey();

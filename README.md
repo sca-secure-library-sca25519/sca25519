@@ -17,7 +17,7 @@ The Cortex-M4 implementations are based on [this](https://github.com/joostrijnev
 
 This code assumes you have the [arm-none-eabi toolchain](https://launchpad.net/gcc-arm-embedded) installed and accessible. Confusingly, the tools available in the (discontinued) embedian project have identical names - be careful to select the correct toolchain (or consider re-installing if you experience unexpected behaviour). On most Linux systems, the correct toolchain gets installed when you install the `arm-none-eabi-gcc` (or `gcc-arm-none-eabi`) package. Besides a compiler and assembler, you may also want to install `arm-none-eabi-gdb`. On Linux Mint, be sure to explicitly install `libnewlib-arm-none-eabi` as well (to fix an error relating to `stdint.h`).
 
-This project relies on the [libopencm3](https://github.com/libopencm3/libopencm3/) firmware. This is included as a submodule; it also can be downloaded directly to the folder libopencm3 in the main directory. Compile it (e.g. by calling `make lib` in one of the platform-specific directories) before attempting to compile any of the other targets.
+This project relies on the [libopencm3](https://github.com/libopencm3/libopencm3/) firmware. This is included as a submodule and we also included it directly to the folder libopencm3 in the main directory. Compile it (e.g. by calling `make lib` in one of the platform-specific directories) before attempting to compile any of the other targets.
 
 The binary can be compiled by calling `make` in each respective subdirectory (unprotected, ephemeral, static). The binary can then be flashed onto the boards using [stlink](https://github.com/texane/stlink), as follows: `st-flash write main.bin 0x8000000`. Depending on your operating system, stlink may be available in your package manager -- otherwise refer to their Github page for instructions on how to [compile it from source](https://github.com/texane/stlink/blob/master/doc/compiling.md) (in that case, be careful to use libusb-1.0.0-dev, not libusb-0.1).
 
@@ -31,7 +31,7 @@ The host-side Python code requires the [pyserial](https://github.com/pyserial/py
     - `stlink`
 
 ### `libopencm3`
-For our evaluation we have used `libopencm3` (https://github.com/libopencm3/libopencm3/) with the commit id: `7daa6f15bf8db77b3225df01e427777b202b4e4e` (from February 5th, 17:22:55, 2019).
+For our evaluation we have used `libopencm3` (https://github.com/libopencm3/libopencm3/) with the commit id: `7daa6f15bf8db77b3225df01e427777b202b4e4e` (from February 5th, 17:22:55, 2019). We have also included it in the libopencm3 directory. 
 
 ## Hooking up an STM32 discovery board
 

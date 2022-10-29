@@ -2,6 +2,7 @@
 #include "../include/sc25519.h"
 #include "../include/randombytes.h"
 #include "../include/crypto_scalarmult.h"
+#include "../../stm32wrapper.h"
 
 typedef struct _ST_curve25519ladderstepWorkingState
 {
@@ -532,3 +533,23 @@ crypto_scalarmult_base_curve25519(
     return crypto_scalarmult_curve25519(q, n, g_basePointCurve25519);
 }
 
+void cycles_cswap() {
+    SCS_DEMCR |= SCS_DEMCR_TRCENA;
+    DWT_CYCCNT = 0;
+    DWT_CTRL |= DWT_CTRL_CYCCNTENA;
+
+    ST_curve25519ladderstepWorkingState state;
+    uint32_t wordwithbit = 10;
+    uint32_t bitnum = 10;
+
+    int i;
+    unsigned int oldcount = DWT_CYCCNT;
+    for (i = 0; i < 1000; i++) {
+      maskScalarBitsWithRandomAndCswap(&state, wordwithbit, bitnum);
+    }
+    unsigned int newcount = DWT_CYCCNT-oldcount;
+
+    char str[100];
+    sprintf(str, "Cost cswap: %d", newcount / 1000);
+    send_USART_str((unsigned char*) str);
+}
