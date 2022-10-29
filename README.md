@@ -1,10 +1,19 @@
-## SCA-secure ECC in software – mission impossible?
+# Introduction to the sca25519 library (SCA-secure ECC in software – mission impossible?)
+
+This repository accompanies the paper **SCA-secure ECC in software – mission impossible?** available at https://tches.iacr.org/.
+
+Authors:
+- [Lejla Batina](https://www.cs.ru.nl/~lejla/) `lejla@cs.ru.nl`
+- Łukasz Chmielewski `lukaszc@cs.ru.nl`
+- Björn Haase `Bjoern.M.Haase@web.de`
+- [Niels Samwel](https://nielssamwel.nl/) `niels.samwel@ru.nl`
+- [Peter Schwabe](https://cryptojedi.org/peter/index.shtml) `peter@cryptojedi.org`
 
 This repository contains three implementations of X25519 in C and assembly for the Cortex-M4 with countermeasures against side-channel and fault injection attacks. The first implementation is unprotected, the second implementation contains for the case of an ephemeral scalar multiplication and the third implementation contains the most countermeasures for the static scalar multiplication. The three implementations are located in similarly named subdirectories. The repository includes a common directory that contains code common to the three implementations and a hostside directory that contains python code to communicate with the board.
 
 The Cortex-M4 implementations are based on [this](https://github.com/joostrijneveld/STM32-getting-started) STM32: getting started repository.
 
-### Installation
+# Installation
 
 This code assumes you have the [arm-none-eabi toolchain](https://launchpad.net/gcc-arm-embedded) installed and accessible. Confusingly, the tools available in the (discontinued) embedian project have identical names - be careful to select the correct toolchain (or consider re-installing if you experience unexpected behaviour). On most Linux systems, the correct toolchain gets installed when you install the `arm-none-eabi-gcc` (or `gcc-arm-none-eabi`) package. Besides a compiler and assembler, you may also want to install `arm-none-eabi-gdb`. On Linux Mint, be sure to explicitly install `libnewlib-arm-none-eabi` as well (to fix an error relating to `stdint.h`).
 
@@ -14,7 +23,17 @@ The binary can be compiled by calling `make` in each respective subdirectory (un
 
 The host-side Python code requires the [pyserial](https://github.com/pyserial/pyserial) module. Your package repository might offer `python-serial` or `python-pyserial` directly (as of writing, this is the case for Ubuntu, Debian and Arch). Alternatively, this can be easily installed from PyPA by calling `pip install pyserial` (or `pip3`, depending on your system). If you do not have `pip` installed yet, you can typically find it as `python3-pip` using your package manager. Use the `host_unidirectional.py` script to receive data from the board.
 
-### Hooking up an STM32 discovery board
+## Requirements Summary
+- `arm-none-eabi-gcc` with version 9.2.1 20191025 (with -O2 optimization flag); all related work for performance evaluation we also compiled using this compiler and the -02 flag. 
+- `python3` with `pyserial`
+- For Cortex-M4F:
+    - Board `stm32f4discovery` (we use floating-point registers)
+    - `stlink`
+
+### `libopencm3`
+For our evaluation we have used `libopencm3` (https://github.com/libopencm3/libopencm3/) with the commit id: `7daa6f15bf8db77b3225df01e427777b202b4e4e` (from February 5th, 17:22:55, 2019).
+
+## Hooking up an STM32 discovery board
 
 Connect the board to your machine using the mini-USB port. This provides it with power, and allows you to flash binaries onto the board. It should show up in `lsusb` as `STMicroelectronics ST-LINK/V2`.
 
@@ -22,11 +41,11 @@ If you are using a UART-USB connector that has a PL2303 chip on board (which app
 
 Using dupont / jumper cables, connect the `TX`/`TXD` pin of the USB connector to the `PA3` pin on the board, and connect `RX`/`RXD` to `PA2`. Depending on your setup, you may also want to connect the `GND` pins.
 
-### Troubleshooting
+## Troubleshooting
 
 At some point the boards might behave differently than one would expect, to a point where simply power-cycling the board does not help. In these cases, it is useful to be aware of a few trouble-shooting steps.
 
-#### Problems related to the tools
+## Problems related to the tools
 
 If you're using Ubuntu, a common issue when using stlink is an error saying you are missing `libstlink-shared.so.1`. In this case, try running [`ldconfig`](https://github.com/texane/stlink/blob/master/doc/compiling.md#fixing-cannot-open-shared-object-file).
 
@@ -34,7 +53,7 @@ If you are running into permission errors when trying to access the serial devic
 
 If you are getting Python errors when running the host-side scripts, make sure you are using Python 3.
 
-#### Problems related to the board
+### Problems related to the board
 
 First, check if all the cables are attached properly. For the boards supported in this repository, connect TX to `PA3`, RX to `PA2` and GND to `GND`. Power is typically supplied using the mini-USB connector that is also used to flash code onto the board.
 
@@ -43,3 +62,38 @@ If the code in this repository does not appear to work correctly after flashing 
 If you cannot flash new code onto the board, but are instead confronted with `WARN src/stlink-common.c: unknown chip id!`, try shorting the `BOOT0` and `VDD` pins and pressing `RST`. This selects the DFU bootloader. After that, optionally use `st-flash erase` before re-flashing the board.
 
 If you cannot flash the code onto the board, and instead get `Error: Data length doesn't have a 32 bit alignment: +2 byte.`, make sure you are using a version of stlink for which [this issue](https://github.com/texane/stlink/issues/390) has been resolved. This affected L0 and L1 boards.
+
+# Structure of this repository
+- `STM32F407-ephemeral` contains our implementation for the ephemeral X25519; this implementation contains some side-channel protections.
+- `STM32F407-static` contains our implementation for the static X25519; this implementation contains multiple side-channel protections.
+- `STM32F407-unprotected` contains our implementation for the unprotected X25519; this implementation contains no side-channel protections besides being constant time.
+- `common` contains common files for the implementations. Currently these files are copied to the implementations but symbolic links can be used instead. 
+- `hostside` contains simple python code to communicate with the device. We use it to read the test results (for the performance evaluation) from the board. 
+
+## Relevant Flags
+
+The following flags are relevant and can be used for performance evaluation: 
+-
+
+# Traces
+
+As mentioned in the paper we run our side-channel experiments using a modified Cortex-M4 (several capacitors are removed) on an STM32F407IGT6 board clocked at 168MHz. 
+The resulting comparison of traces corresponding to all three implementations is present below: 
+
+To help reproduce the side-channel evaluation, for each of the implementations we upload 100 traces under the following links: 
+- for the ephemeral X25519;
+- for the static X25519;
+- for the unprotected X25519. 
+
+# Format
+
+Each trace set is in the TRS format that is described under the following links:
+https://github.com/Riscure/python-trsfile
+https://github.com/Riscure/java-trsfile
+https://github.com/Riscure/Jlsca 
+
+The python `trsfile` package can be used to read the traces and it can be installed using pip: https://pypi.org/project/trsfile/. 
+
+# License
+All our code is covered by CC0. `libopencm3` is licensed under GPL version 3, see https://github.com/libopencm3/libopencm3.
+
