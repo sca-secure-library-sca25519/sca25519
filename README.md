@@ -73,7 +73,10 @@ If you cannot flash the code onto the board, and instead get `Error: Data length
 ## Relevant Flags
 
 The following flags are relevant and can be used for performance evaluation: 
--
+- `ITOH_COUNTERMEASURE` and `ITOH_COUNTERMEASURE64` specify whether the address randomization is turned on; 
+- `UPDATABLE_STATIC_SCALAR` specifies whether the static scalar is being updated per each scalar multiplication call and `SCALAR_RANDOMIZATION` specifies whether the scalar is updated just before the scalar multiplication (turning these countermeasures of is important for template attacks);
+- `COUNT_CYCLES_EXTRA_SM` is only useful when measuring clock cycles that the extra 64-bit scalar multiplication takes; 
+- `MULTIPLICATIVE_CSWAP` - is a flag that can be used for two different implementations of the cswaperr. All the results in the paper are presented when MULTIPLICATIVE_CSWAP is enabled. 
 
 # Traces
 
