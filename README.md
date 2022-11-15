@@ -1,6 +1,8 @@
 # The sca25519 library ("SCA-secure ECC in software – mission impossible?")
 
-This repository accompanies the paper **SCA-secure ECC in software – mission impossible?** available at https://tches.iacr.org/index.php/TCHES/issue/.
+This repository accompanies the paper **SCA-secure ECC in software – mission impossible?** available at 
+- https://eprint.iacr.org/2021/1003 and 
+- https://tches.iacr.org/index.php/TCHES/issue/.
 
 Authors:
 - [Lejla Batina](https://www.cs.ru.nl/~lejla/) `lejla@cs.ru.nl`
