@@ -9,7 +9,7 @@ OPENCM3_DIR = ../libopencm3
 LDSCRIPT   = ../common/stm32f405x6_CCM.ld
 LIBNAME    = opencm3_stm32f4
 ARCH_FLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
-DEFINES    = -DSTM32F4 -DCORTEX_M4
+DEFINES    = -DSTM32F4 -DCORTEX_M4 -DWITH_PERFORMANCE_BENCHMARKING
 OBJS	   = stm32f4_wrapper.o test.o \
 			 crypto/asm/cortex_m4_cswap.o crypto/asm/cortex_m4_hsalsa20_block.o crypto/asm/cortex_m4_reduce25519.o crypto/asm/cortex_m4_sqr_fe25519.o crypto/asm/cortex_m4_mpy_fe25519.o crypto/asm/cortex_m4_add_fe25519.o crypto/asm/cortex_m4_mpy_256.o crypto/asm/cortex_m4_mpy121666.o crypto/asm/cortex_m4_sqr_256.o \
 			 crypto/support/randombytes.o \

@@ -17,7 +17,8 @@
 #define CRYPTO_HAS_ASM_FE25519_SQUARE
 #define CRYPTO_HAS_ASM_FE25519_ADD
 
-// Assembly squaring for 256x256 => 512 is considerably faster than the C version
+// Assembly squaring for 256x256 => 512 is considerably faster than the C
+// version
 #define CRYPTO_HAS_ASM_SQR_256
 #define CRYPTO_HAS_ASM_MPY_192
 #define CRYPTO_HAS_ASM_SQR_192
@@ -28,8 +29,8 @@
 
 #if defined(__clang__) || defined(__GNUC__)
 
-#define FORCE_INLINE inline __attribute__ ((__always_inline__))
-#define NO_INLINE __attribute__ ((noinline))
+#define FORCE_INLINE inline __attribute__((__always_inline__))
+#define NO_INLINE __attribute__((noinline))
 
 #else
 
@@ -38,6 +39,4 @@
 
 #endif
 
-
-
-#endif // #ifdef TARGET_CONFIG_HEADER_
+#endif  // #ifdef TARGET_CONFIG_HEADER_

@@ -26,4 +26,4 @@
 
 // #endif
 
-#endif // #ifdef TARGET_CONFIG_HEADER_
+#endif  // #ifdef TARGET_CONFIG_HEADER_
