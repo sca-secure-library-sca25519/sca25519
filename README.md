@@ -19,7 +19,17 @@ The Cortex-M4 implementations are based on [this](https://github.com/joostrijnev
 
 This code assumes you have the [arm-none-eabi toolchain](https://launchpad.net/gcc-arm-embedded) installed and accessible. Confusingly, the tools available in the (discontinued) embedian project have identical names - be careful to select the correct toolchain (or consider re-installing if you experience unexpected behaviour). On most Linux systems, the correct toolchain gets installed when you install the `arm-none-eabi-gcc` (or `gcc-arm-none-eabi`) package. Besides a compiler and assembler, you may also want to install `arm-none-eabi-gdb`. On Linux Mint, be sure to explicitly install `libnewlib-arm-none-eabi` as well (to fix an error relating to `stdint.h`).
 
-This project relies on the [libopencm3](https://github.com/libopencm3/libopencm3/) firmware. This is included as a submodule and we also included it directly to the folder libopencm3 in the main directory. Compile it (e.g. by calling `make lib` in one of the platform-specific directories) before attempting to compile any of the other targets.
+This project relies on the [libopencm3](https://github.com/libopencm3/libopencm3/) firmware. This is included as a submodule and we also included it directly to the folder libopencm3 in the main directory.
+When using git from the command line, you might 
+need to execute "git submodule init" and "git submodule update" in the root directory first. Compile it (e.g. by calling `make lib` within the `STM32F407-unprotected` directory) before attempting to compile any of the other targets.
+On some systems where there is no symlink from the python3 binary to a python executable available, you might need to replace the line `#!/usr/bin/env python` in the files `gendoxylayout.py` and `genlink.py` with `#!/usr/bin/env python3` instead (subdirectory libopencm3/scripts).
+If you observe problems with building libopencm3 (e.g. reports regarding 
+"unterminated quotes") it might help to fix line #27 in the file `libopencm3/Makefile` by replacing the assignment \
+`SRCLIBDIR:= $(subst $(space),\$(space),$(realpath lib))` \
+with \
+`SRCLIBDIR:= $(subst $(space),\$(space),$(realpath ./))/lib` \
+or if your directory path does not contain spaces with \
+`SRCLIBDIR:= $(subst $(space),/$(space),$(realpath lib))`. \
 
 The binary can be compiled by calling `make` in each respective subdirectory (unprotected, ephemeral, static). The binary can then be flashed onto the boards using [stlink](https://github.com/texane/stlink), as follows: `st-flash write main.bin 0x8000000`. Depending on your operating system, stlink may be available in your package manager -- otherwise refer to their Github page for instructions on how to [compile it from source](https://github.com/texane/stlink/blob/master/doc/compiling.md) (in that case, be careful to use libusb-1.0.0-dev, not libusb-0.1).
 
@@ -78,7 +88,20 @@ The following flags are relevant and useful for performance evaluation:
 - `ITOH_COUNTERMEASURE` and `ITOH_COUNTERMEASURE64` (in file `scalarmult_25519.c`) specify whether the address randomization is turned on in the static multiplication; both are turned on by default; 
 - `UPDATABLE_STATIC_SCALAR` (in file `scalarmult_25519.c`) specifies whether the static scalar is being updated per each scalar multiplication call and `SCALAR_RANDOMIZATION` (also in `scalarmult_25519.c`) specifies whether the scalar is updated just before the scalar multiplication (turning these countermeasures of is important for template attacks); both flags are turned on by default; 
 - `COUNT_CYCLES_EXTRA_SM` (in file `crypto_scalarmult.h`) is only useful when measuring clock cycles that the extra 64-bit scalar multiplication takes in the static implementation; otherwise, the flag should be turned off because it affects the efficiency of the scalar multiplication; it is turned off by default;
+- `WITH_PERFORMANCE_BENCHMARKING` defines whether the code for measuring clock cycles is present in the library; by default it is enable in the Makefile: `-DWITH_PERFORMANCE_BENCHMARKING`;
 - `MULTIPLICATIVE_CSWAP` (in file `crypto_scalarmult.h`) is a flag that can be used for two different implementations of the `cswaperr` procedure (for both, the ephemeral and static implementations). All the results in the paper are presented when `MULTIPLICATIVE_CSWAP` is enabled, since this implementation occurred to be safer and more efficient. 
+
+### Code Formatting
+
+All the code base was cleaned using the following commands:
+- ```clang-format --style=Google -i `find ./STM32F407-* common | grep "\.h"` ```
+- ```clang-format --style=Google -i `find ./STM32F407-* common |  grep "\.c"` ```
+
+# Execution time
+
+The execution times of the tests for the unprotected and ephemeral implementations are relatively fast (less than a minute). However, the test for the static implementation takes much more time, approximately, 16-17 minutes.
+The amount of cycles might slightly differ from the results presented in the paper due to the fact the execution times are randomized (due to the protection of the inversion, for example). 
+Furthermore, the version of the compiler might slightly influence this amount too. 
 
 # Traces
 
