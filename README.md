@@ -65,6 +65,8 @@ If you are running into permission errors when trying to access the serial devic
 
 If you are getting Python errors when running the host-side scripts, make sure you are using Python 3.
 
+Some issues can be caused by symbolic link not working correctly. We recommend cloning the git repository and not downloading the zip file from the web github interface. 
+
 ### Problems related to the board
 
 First, check if all the cables are attached properly. For the boards supported in this repository, connect TX to `PA3`, RX to `PA2` and GND to `GND`. Power is typically supplied using the mini-USB connector that is also used to flash code onto the board.
