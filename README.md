@@ -1,7 +1,7 @@
 # The sca25519 library ("SCA-secure ECC in software – mission impossible?")
 
 This repository accompanies the paper **SCA-secure ECC in software – mission impossible?** available at 
-- https://tches.iacr.org/index.php/TCHES/issue/view/312 and
+- https://tches.iacr.org/index.php/TCHES/article/view/9962 and
 - https://eprint.iacr.org/2021/1003.
 
 Authors:
@@ -109,9 +109,9 @@ Furthermore, the version of the compiler might slightly influence this amount to
 
 As mentioned in the paper we run our side-channel experiments using a modified Cortex-M4 (several capacitors are removed) on an STM32F407IGT6 board clocked at 168MHz. 
 The resulting comparison of traces corresponding to all three implementations is present below: 
+![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/UnprotectedSM_mark2.png?raw=true "Unprotected Implementation")
 ![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/EphemeralSM_mark2.png?raw=true "Ephemeral Implementation")
 ![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/StaticSM_mark2.png?raw=true "Static Implementation")
-![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/UnprotectedSM_mark2.png?raw=true "Unprotected Implementation")
 
 
 The scalar multiplications are marked in red. 
