@@ -6,7 +6,7 @@ This repository accompanies the paper **SCA-secure ECC in software – mission i
 
 Authors:
 - [Lejla Batina](https://www.cs.ru.nl/~lejla/) `lejla@cs.ru.nl`
-- Łukasz Chmielewski `chmiel@fi.muni.cz` and `lukaszc@cs.ru.nl`
+- Łukasz Chmielewski `chmiel@fi.muni.cz`
 - Björn Haase `Bjoern.M.Haase@web.de`
 - [Niels Samwel](https://nielssamwel.nl/) `niels.samwel@ru.nl`
 - [Peter Schwabe](https://cryptojedi.org/peter/index.shtml) `peter@cryptojedi.org`
