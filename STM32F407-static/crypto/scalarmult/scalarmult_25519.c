@@ -579,6 +579,11 @@ void update_static_key_curve25519() {
 /// This function implements algorithm 3 from the paper 
 /// "SoK: SCA-Secure ECC in software - mission impossible?"
 /// (https://tches.iacr.org/index.php/TCHES/article/view/9962)
+/// We refer to this paper using "orig." here.
+/// We updated this algorithm slightly (especially the order of steps) in: 
+/// "An update to the sca25519 library: mitigation card-tearing-based side-channel attacks"
+/// (PLACEHOLDER: https://eprint.iacr.org/2024/)
+/// The "alg. step" comments refer to this modified version of the algorithm. 
 ///
 /// Comments such as "### alg. step 1 ###" provide to the respective line number of
 /// pseudo-code used in the paper.
@@ -591,18 +596,23 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   volatile uint32_t fid_counter = 0;  // for fault injection detection ### alg. step 1 ###
 
   // Initialize return value with random bits
-  randombytes(r, 32); // ### alg. step 1 ###
+  randombytes(r, 32); // ### alg. step 1 (also 1 in orig.) ###
+
+/* Lukasz update:*/
+  // update the key and the secret state data
+  update_static_key_curve25519(); // ### alg. step 2, orig. 49-51
+
 
   // Prepare the scalar within the working state buffer.
   for (i = 0; i < 32; i++) {
     state.s.as_uint8_t[i] = static_key.as_uint8_t[i];
     INCREMENT_BY_NINE(fid_counter);
-  } // ### alg. step 2 ###
+  } // ### alg. step 3, originally 2 ###
 
   // Copy the affine x-axis of the base point to the state.
-  fe25519_unpack(&state.x0, p); // ### alg. step 14 ###
+  fe25519_unpack(&state.x0, p); // ### alg. step 15, orig. 14 ###
 
-  // ### alg. step 15 ###
+  // ### alg. step 16, step 15 ###
   fe25519_setone(&state.xq);
   fe25519_setzero(&state.zq);
   fe25519_cpy(&state.xp, &state.x0);
@@ -622,11 +632,11 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 
   if (computeY_curve25519_affine(&yp, &state.x0) != 0) {
     goto fail;
-  } // ### alg. step 3 ###
+  } // ### alg. step 4, orig. 3 ###
   
-  curve25519_addPoint(&P, &P, &R); // ### alg. step 5 ###
+  curve25519_addPoint(&P, &P, &R); // ### alg. step 6, orig. 5 ###
 
-  // Double 3 times before we start ### alg. step 6 ###
+  // Double 3 times before we start ### alg. step 7, orig. 6 ###
   curve25519_doublePoint(&P, &P);
   curve25519_doublePoint(&P, &P);
   curve25519_doublePoint(&P, &P);
@@ -637,30 +647,30 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   fe25519 t, Rinv, randB;
   fe25519_setzero((fe25519*)&state.r);
 
-  // ### alg. step 7 ###
+  // ### alg. step 8, orig. step 7 ###
   do {
     randombytes(state.r.as_uint8_t, 8);
   } while (!state.r.as_64_bitValue_t[0].as_uint64_t[0]);
   //! fe25519_iszero(&state.r)
 
   randombytes(randVal.as_uint8_t, 64);
-  fe25519_reduceTo256Bits(&randB, &randVal); // ### alg. step 8 ###
+  fe25519_reduceTo256Bits(&randB, &randVal); // ### alg. step 9, orig. 8 ###
 
-  sc25519_mul(&t, &state.r, &randB); // ### alg. step 9 ###
+  sc25519_mul(&t, &state.r, &randB); // ### alg. step 10, orig. 9 ###
   
-  // ### alg. step 10 ###
+  // ### alg. step 11, orig. 10 ###
   sc25519_inverse(&t, &t);
   sc25519_mul(&Rinv, &t, &randB);
   
-  sc25519_mul(&state.s, &state.s, &Rinv); // // ### alg. step 11 ###
+  sc25519_mul(&state.s, &state.s, &Rinv); // // ### alg. step 12, orig. 11 ###
 #else
   fe25519_setone((fe25519*)&state.r);
 #endif
 
-  // new re-rand ### alg. step 12 ###
+  // new re-rand ### alg. step 13, orig. 12 ###
   sc25519_mul(&state.s, &state.s, &blindingFactor);
 
-  INCREMENT_BY_163(fid_counter); // ### alg. step 13 ###
+  INCREMENT_BY_163(fid_counter); // ### alg. step 14, orig. 13 ###
 
   // Optimize for stack usage when implementing  ### alg. step 14 ###
 
@@ -673,7 +683,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 
   fe25519_cpy(&state.x0, &state.xp);
 
-  //  ### alg. step 16 ###
+  //  ### alg. step 17, orig. 16 ###
   // Reinitialize coordinates
   // Prepare the working points within the working state struct.
   randombytes(randVal.as_uint8_t, 64);
@@ -689,7 +699,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 
   state.nextScalarBitToProcess = 253;  // 252;
 
-  // ### alg. step 17 ###
+  // ### alg. step 18, orig. 17 ###
   // Prepare scalar xor previous bit. Always operate on
   // at least 16 scalar bits together.
   for (i = 7; i >= 1; i--) {
@@ -706,7 +716,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   state.s.as_uint32_t[0] ^= state.s.as_uint32_t[0] << 1;
 
 #ifdef ITOH_COUNTERMEASURE
-  // ### alg. step 18 ###
+  // ### alg. step 19, orig. 18 ###
   UN_256bitValue itoh;
   randombytes(itoh.as_uint8_t, 32);
   itoh.as_uint8_t[31] &= 63;  // 31;//15
@@ -714,7 +724,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   UN_256bitValue itohShift;
   cpy_256bitvalue(&itohShift, &itoh);
 
-  // ### alg. step 19 ###
+  // ### alg. step 20, orig. 19 ###
   itohShift.as_uint32_t[7] <<= 1;
   for (i = 7; i >= 1; i--) {
     uint32_t overflow;
@@ -740,14 +750,14 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 
 #ifdef ITOH_COUNTERMEASURE
 #ifdef MULTIPLICATIVE_CSWAP
-  // ### alg. step 21 ###
+  // ### alg. step 22, orig. 21 ###
   maskScalarBitsWithRandomAndCswap(&state, itohShift.as_uint32_t[7], 30);
 #else
   curve25519_cswap_asm(&state, &itohShift.as_uint32_t[7]);
 #endif
 #endif
 
-  // ### alg. step 22 ###
+  // ### alg. step 23, orig. 22 ###
   while (state.nextScalarBitToProcess >= 0) {
     uint8_t limbNo = 0;
     uint8_t bitNo = 0;
@@ -755,7 +765,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
     {
       limbNo = (uint8_t)(state.nextScalarBitToProcess >> 5);
       bitNo = state.nextScalarBitToProcess & 0x1f;
-      // ### alg. step 22 and ###
+      // ### alg. step 23, orig. 22 and [XXX]###
 
       maskScalarBitsWithRandomAndCswap(&state, state.s.as_uint32_t[limbNo],
                                        bitNo);
@@ -773,16 +783,16 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 #endif
     }
 #endif
-    if (state.nextScalarBitToProcess >= 1)  // ### alg. step 24
+    if (state.nextScalarBitToProcess >= 1)  // ### alg. step 25, orig. 24
     {
-      curve25519_ladderstep(&state); // alg. step 25
+      curve25519_ladderstep(&state); // alg. step 26, orig. 25
 
-      INCREMENT_BY_NINE(fid_counter); // alg. step 27
+      INCREMENT_BY_NINE(fid_counter); // alg. step 28, orig. 27
 
 #ifdef MULTIPLICATIVE_CSWAP
 #ifdef ITOH_COUNTERMEASURE
       maskScalarBitsWithRandomAndCswap(&state, itohShift.as_uint32_t[limbNo],
-                                       bitNo); // ### alg. step 26
+                                       bitNo); // ### alg. step 27, orig. 26
 #endif
 #else
 #ifdef ITOH_COUNTERMEASURE
@@ -808,11 +818,11 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 
 #endif // #ifdef WITH_PERFORMANCE_BENCHMARKING
 
-  // ### alg. step 28
+  // ### alg. step 29, orig. 28
   computeY_curve25519_projective(&y0, &state.xp, &state.zp, &state.xq,
                                  &state.zq, &state.x0, &yp);
 
-  // ### alg. step 29
+  // ### alg. step 30, orig. 29
   // Short scalar multiplication to undo multiplicative scalar blinding
   // Optimize for stack usage.
   fe25519_invert_useProvidedScratchBuffers(&state.zp, &state.zp, &state.xq,
@@ -823,7 +833,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   fe25519_mul(&y0, &y0, &state.zp);
   fe25519_cpy(&state.x0, &state.xp);
 
-  // ### alg. step 31
+  // ### alg. step 32, orig. 31
   // Reinitialize coordinates
   // Prepare the working points within the working state struct.
   randombytes(randVal.as_uint8_t, 64);
@@ -833,14 +843,14 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   state.zq.as_uint8_t[31] |= 128;
   fe25519_mul(&state.xq, &state.zq, &state.x0);
 
-  // ### alg. step 30
+  // ### alg. step 31, orig. 30
   fe25519_setone(&state.xp);
   fe25519_setzero(&state.zp);
 
   state.nextScalarBitToProcess = 64;
 #if 1
   // Prepare scalar xor previous bit
-  // ### alg. step 33 and 34
+  // ### alg. step 34 and 35, orig. 33 and 34
   for (i = 2; i >= 1; i--) {
     uint32_t tmp = state.r.as_uint32_t[i] << 1;
     tmp |= state.r.as_uint32_t[i - 1] >> 31;
@@ -866,7 +876,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 #endif
 
 #ifdef ITOH_COUNTERMEASURE64
-  // ### alg. step 32
+  // ### alg. step 33, orig. 32
   UN_256bitValue itoh64;
   fe25519_setzero((fe25519*)&itoh64);
   randombytes(itoh64.as_uint8_t, 12);
@@ -900,14 +910,14 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 
 #ifdef ITOH_COUNTERMEASURE64
 #ifdef MULTIPLICATIVE_CSWAP
-  // ### alg. step 36
+  // ### alg. step 37, orig. 36
   maskScalarBitsWithRandomAndCswap(&state, itoh64Shift.as_uint32_t[2], 1);
 #else
   curve25519_cswap_asm(&state, &itoh64Shift.as_uint32_t[2]);
 #endif
 #endif
 
-  while (state.nextScalarBitToProcess >= 0) // ### alg. step 37
+  while (state.nextScalarBitToProcess >= 0) // ### alg. step 38, orig. 37
   {
     uint8_t limbNo = 0;
     uint8_t bitNo = 0;
@@ -917,7 +927,7 @@ int crypto_scalarmult_curve25519(uint8_t* r,
       limbNo = (uint8_t)(state.nextScalarBitToProcess >> 5);
       bitNo = state.nextScalarBitToProcess & 0x1f;
 
-      // ### alg. step 38
+      // ### alg. step 39, orig. 38
       maskScalarBitsWithRandomAndCswap(&state, state.r.as_uint32_t[limbNo],
                                        bitNo);
     }
@@ -935,15 +945,15 @@ int crypto_scalarmult_curve25519(uint8_t* r,
     }
 #endif
 
-    if (state.nextScalarBitToProcess >= 1) // ### alg. step 39
+    if (state.nextScalarBitToProcess >= 1) // ### alg. step 40, orig. 39
     {
-      curve25519_ladderstep(&state); // ### alg. step 40
-      INCREMENT_BY_NINE(fid_counter); // ### alg. step 42
+      curve25519_ladderstep(&state); // ### alg. step 41, orig. 40
+      INCREMENT_BY_NINE(fid_counter); // ### alg. step 43, orig. 42
 
 #ifdef MULTIPLICATIVE_CSWAP
 #ifdef ITOH_COUNTERMEASURE64
       maskScalarBitsWithRandomAndCswap(&state, itoh64Shift.as_uint32_t[limbNo],
-                                       bitNo); // ### alg. step 41
+                                       bitNo); // ### alg. step 42, orig. 41
 #endif
 #else
 #ifdef ITOH_COUNTERMEASURE64
@@ -979,27 +989,30 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   P.z = &state.zp;
   fe25519_cpy(A.y, &Sy);
   fe25519_neg(A.y, A.y);
-  curve25519_addPoint(&P, &P, &A); // ### alg. step 44
+  curve25519_addPoint(&P, &P, &A); // ### alg. step 45, orig. 44
 
-  // Optimize for stack usage for ### alg. step 45
+  // Optimize for stack usage for ### alg. step 46, orig. 45
   fe25519_invert_useProvidedScratchBuffers(&state.zp, &state.zp, &state.xq,
                                            &state.zq, &state.x0);
   fe25519_mul(&state.xp, &state.xp, &state.zp);
   fe25519_reduceCompletely(&state.xp);
   INCREMENT_BY_163(fid_counter);
 
-  if (fid_counter != (4 * 163 + 350 * 9)) // ### alg. step 47
+  if (fid_counter != (4 * 163 + 350 * 9)) // ### alg. step 48, orig. 47
   {
   fail:
     retval = -1;
-    randombytes(state.xp.as_uint8_t, 32); // ### alg. step 48
+    randombytes(state.xp.as_uint8_t, 32); // ### alg. step 49, orig. 48
   } else {
     retval = 0;
   }
   fe25519_pack(r, &state.xp);
 
+/*
+  These original update is moved to the beginning
   // update the key and the secret state data
-  update_static_key_curve25519(); // ### alg. step 49-51
+  update_static_key_curve25519(); // ### orig. alg. step 49-51
+*/
   return retval;
 }
 
