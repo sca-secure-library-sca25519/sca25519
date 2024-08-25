@@ -15,6 +15,12 @@ This repository contains three implementations of X25519 in C and assembly for t
 
 The Cortex-M4 implementations are based on [this](https://github.com/joostrijneveld/STM32-getting-started) STM32: getting started repository.
 
+## Update #1
+
+We have added a slight update to repository to mitigate tearing-based side-channel attacks. The details of that update are in **Note #1: Update to the Sca25519 Library, 
+Mitigating Tearing-based Side-channel Attacks** available at: 
+- eprint (TBD)
+
 # Installation
 
 This code assumes you have the [arm-none-eabi toolchain](https://launchpad.net/gcc-arm-embedded) installed and accessible. Confusingly, the tools available in the (discontinued) embedian project have identical names - be careful to select the correct toolchain (or consider re-installing if you experience unexpected behaviour). On most Linux systems, the correct toolchain gets installed when you install the `arm-none-eabi-gcc` (or `gcc-arm-none-eabi`) package. Besides a compiler and assembler, you may also want to install `arm-none-eabi-gdb`. On Linux Mint, be sure to explicitly install `libnewlib-arm-none-eabi` as well (to fix an error relating to `stdint.h`).
