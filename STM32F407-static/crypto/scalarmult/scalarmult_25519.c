@@ -606,6 +606,10 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   // Prepare the scalar within the working state buffer.
   for (i = 0; i < 32; i++) {
     state.s.as_uint8_t[i] = static_key.as_uint8_t[i];
+    /*Lukasz:
+    //blinding factor becomes state.r since update was performed. The key and r will only be used once
+    */
+    state.r.as_uint8_t[i] = blindingFactor.as_uint8_t[i];
     INCREMENT_BY_NINE(fid_counter);
   } // ### alg. step 3, originally 2 ###
 
@@ -641,8 +645,10 @@ int crypto_scalarmult_curve25519(uint8_t* r,
   curve25519_doublePoint(&P, &P);
   curve25519_doublePoint(&P, &P);
 
+  UN_512bitValue randVal; //Lukasz: this needs to be left since it will be used later on too
+/* 
+//Lukasz: removing scalar randomization since update was performed already
   // Randomize scalar multiplicatively
-  UN_512bitValue randVal;
 #ifdef SCALAR_RANDOMIZATION
   fe25519 t, Rinv, randB;
   fe25519_setzero((fe25519*)&state.r);
@@ -666,9 +672,13 @@ int crypto_scalarmult_curve25519(uint8_t* r,
 #else
   fe25519_setone((fe25519*)&state.r);
 #endif
+*/
 
+/* 
+//Lukasz: removing multiplication by blinding factor
   // new re-rand ### alg. step 13, orig. 12 ###
   sc25519_mul(&state.s, &state.s, &blindingFactor);
+*/
 
   INCREMENT_BY_163(fid_counter); // ### alg. step 14, orig. 13 ###
 
