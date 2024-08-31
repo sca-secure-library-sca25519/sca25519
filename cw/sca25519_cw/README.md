@@ -9,3 +9,4 @@ All the files in the root directory `main.h`, `main.h`, `main.c`, `test.h`, `tes
 Run `sca25519.ipynb` in jupter notebook. 
 
 As a result you should get a trace looking more or less as follows: 
+![alt text](./fig/unprotected_cw.png?raw=true "Unprotected Implementation")
