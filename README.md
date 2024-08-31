@@ -145,9 +145,11 @@ All our code is covered by CC0. `libopencm3` is licensed under GPL version 3, se
 
 # Running the sca25519 library (release 1.0) on ChipWhisperer
 
-On instruction how to run the code on ChipWhisperer see: [ChipWhisperer folder](./cw/)
+On instruction how to run the code on ChipWhisperer see: [ChipWhisperer sca25519 folder](./cw/)
 
 Be aware what when running on F3 you need to use pseudorandom generator, as instructed. 
+
+To start go to 
 
 Authors of the porting:
 - Léo Weissbart `l.weissbart@cs.ru.nl `
