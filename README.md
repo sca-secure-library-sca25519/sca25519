@@ -19,7 +19,11 @@ The Cortex-M4 implementations are based on [this](https://github.com/joostrijnev
 
 We have added a slight update to repository to mitigate tearing-based side-channel attacks. The details of that update are in **Note #1: Update to the Sca25519 Library, 
 Mitigating Tearing-based Side-channel Attacks** available at: 
-- eprint (TBD)
+- https://eprint.iacr.org/2024/1350
+
+Authors of the update
+- Łukasz Chmielewski `chmiel@fi.muni.cz`
+- Lubomír Hrbáček `493077@mail.muni.cz`
 
 # Installation
 
@@ -139,3 +143,12 @@ The python `trsfile` package can be used to read the traces and it can be instal
 All our code is covered by CC0. `libopencm3` is licensed under GPL version 3, see https://github.com/libopencm3/libopencm3.
 
 
+# Running the sca25519 library (release 1.0) on ChipWhisperer
+
+On instruction how to run the code on ChipWhisperer see: [ChipWhisperer folder](./cw/README.md)
+
+Be aware what when running on F3 you need to use pseudorandom generator, as instructed. 
+
+Authors of the porting:
+- Léo Weissbart `l.weissbart@cs.ru.nl `
+- Łukasz Chmielewski `chmiel@fi.muni.cz`
