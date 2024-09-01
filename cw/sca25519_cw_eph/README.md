@@ -6,13 +6,13 @@ All the files in the root directory `main.h`, `main.h`, `main.c`, `test.h`, `tes
 
 ## How to run?
 
-Run `sca25519.ipynb` in jupter notebook. 
+Run `sca25519.ipynb` in jupiter notebook. 
 
 As a result you should get a trace looking more or less as follows: 
 ![alt text](./fig/ephemeral_cw.png?raw=true "Ephemeral Implementation")
 
 ## Comment
 
-The current code just captures a single trace for a hardcoded test verctor. If you want to randomize the input or the key - this code would need to be added to the code (currently the data provided by the command is not used). 
+The current code just captures a single trace for a hardcoded test vector. If you want to randomize the input or the key - this code would need to be added to the code (currently the data provided by the command is not used). 
 
 Additionally, if you would like to reproduce the results from the Ches paper a TRNG should be used. 
