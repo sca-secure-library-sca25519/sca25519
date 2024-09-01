@@ -9,7 +9,13 @@ All the files in the root directory `main.h`, `main.h`, `main.c`, `test.h`, `tes
 Run `sca25519.ipynb` in jupter notebook. 
 
 As a result you should get a trace looking more or less as follows: 
-![alt text](./fig/ephemeral_cw.png?raw=true "Ephemeral Implementation")
+![alt text](./fig/ephemeral_cw.png?raw=true "Unprotected Implementation")
+
+#define ITOH_COUNTERMEASURE
+#define ITOH_COUNTERMEASURE64
+#define UPDATABLE_STATIC_SCALAR
+#define SCALAR_RANDOMIZATION
+
 
 ## Comment
 
