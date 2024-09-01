@@ -32,7 +32,7 @@ If all four defines are commented out then you should get a trace looking more o
 
 If you would like to provide a masked scalar to the implementation then you would need to implement such a code in `main.c` (at the moment it is not implemented). However, the library provides a function to set the key values accordingly: `set_static_key_curve25519` in `scalarmult_25519.c`. 
 
-Since the key consist of multiple components it is not trivial to generate a proper key, we provide a [sage](https://www.sagemath.org/) script to do that - see `./sage/`.
+Since the key consist of multiple components it is not trivial to generate a proper key, we provide a [sage](https://www.sagemath.org/) script to do that - see `./sage/genBlindingPoints.sage`.
 
 ## Comment
 
