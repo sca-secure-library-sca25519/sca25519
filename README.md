@@ -65,7 +65,7 @@ Using dupont / jumper cables, connect the `TX`/`TXD` pin of the USB connector to
 
 ## Troubleshooting
 
-At some point the boards might behave differently than one would expect, to a point where simply power-cycling the board does not help. In these cases, it is useful to be aware of a few trouble-shooting steps.
+At some point, the boards might behave differently than one would expect, to a point where simply power-cycling the board does not help. In these cases, it is useful to be aware of a few troubleshooting steps.
 
 ## Problems related to the tools
 
@@ -75,24 +75,24 @@ If you are running into permission errors when trying to access the serial devic
 
 If you are getting Python errors when running the host-side scripts, make sure you are using Python 3.
 
-Some issues can be caused by symbolic link not working correctly. We recommend cloning the git repository and not downloading the zip file from the web github interface. 
+Some issues can be caused by symbolic links not working correctly. We recommend cloning the git repository and not downloading the zip file from the web github interface. 
 
 ### Problems related to the board
 
 First, check if all the cables are attached properly. For the boards supported in this repository, connect TX to `PA3`, RX to `PA2` and GND to `GND`. Power is typically supplied using the mini-USB connector that is also used to flash code onto the board.
 
-If the code in this repository does not appear to work correctly after flashing it on to the board, try pressing the `RST` button (optionally followed by re-flashing).
+If the code in this repository does not appear to work correctly after flashing it onto the board, try pressing the `RST` button (optionally followed by re-flashing).
 
-If you cannot flash new code onto the board, but are instead confronted with `WARN src/stlink-common.c: unknown chip id!`, try shorting the `BOOT0` and `VDD` pins and pressing `RST`. This selects the DFU bootloader. After that, optionally use `st-flash erase` before re-flashing the board.
+If you cannot flash new code onto the board but are instead confronted with `WARN src/stlink-common.c: unknown chip id!`, try shorting the `BOOT0` and `VDD` pins and pressing `RST`. This selects the DFU bootloader. After that, optionally use `st-flash erase` before re-flashing the board.
 
-If you cannot flash the code onto the board, and instead get `Error: Data length doesn't have a 32 bit alignment: +2 byte.`, make sure you are using a version of stlink for which [this issue](https://github.com/texane/stlink/issues/390) has been resolved. This affected L0 and L1 boards.
+If you cannot flash the code onto the board and instead get `Error: Data length doesn't have a 32-bit alignment: +2 byte.`, make sure you are using a version of stlink for which [this issue](https://github.com/texane/stlink/issues/390) has been resolved. This affected L0 and L1 boards.
 
 # Structure of this repository
 - `STM32F407-ephemeral` contains our implementation for the ephemeral X25519; this implementation contains some side-channel protections.
 - `STM32F407-static` contains our implementation for the static X25519; this implementation contains multiple side-channel protections.
 - `STM32F407-unprotected` contains our implementation for the unprotected X25519; this implementation contains no side-channel protections besides being constant-time.
-- `common` contains common files for the implementations. Currently these files are copied to the implementations but symbolic links can be used instead. 
-- `hostside` contains simple python code to communicate with the device. We use it to read the test results (for the performance evaluation) from the board. 
+- `common` contains common files for the implementations. Currently, these files are copied to the implementations, but symbolic links can be used instead. 
+- `hostside` contains simple Python code to communicate with the device. We use it to read the test results (for the performance evaluation) from the board. 
 
 ## Relevant Flags
 
@@ -100,7 +100,7 @@ The following flags are relevant and useful for performance evaluation:
 - `ITOH_COUNTERMEASURE` and `ITOH_COUNTERMEASURE64` (in file `scalarmult_25519.c`) specify whether the address randomization is turned on in the static multiplication; both are turned on by default; 
 - `UPDATABLE_STATIC_SCALAR` (in file `scalarmult_25519.c`) specifies whether the static scalar is being updated per each scalar multiplication call and `SCALAR_RANDOMIZATION` (also in `scalarmult_25519.c`) specifies whether the scalar is updated just before the scalar multiplication (turning these countermeasures of is important for template attacks); both flags are turned on by default; 
 - `COUNT_CYCLES_EXTRA_SM` (in file `crypto_scalarmult.h`) is only useful when measuring clock cycles that the extra 64-bit scalar multiplication takes in the static implementation; otherwise, the flag should be turned off because it affects the efficiency of the scalar multiplication; it is turned off by default;
-- `WITH_PERFORMANCE_BENCHMARKING` defines whether the code for measuring clock cycles is present in the library; by default it is enable in the Makefile: `-DWITH_PERFORMANCE_BENCHMARKING`;
+- `WITH_PERFORMANCE_BENCHMARKING` defines whether the code for measuring clock cycles is present in the library; by default, it is enabled in the Makefile: `-DWITH_PERFORMANCE_BENCHMARKING`;
 - `MULTIPLICATIVE_CSWAP` (in file `crypto_scalarmult.h`) is a flag that can be used for two different implementations of the `cswaperr` procedure (for both, the ephemeral and static implementations). All the results in the paper are presented when `MULTIPLICATIVE_CSWAP` is enabled, since this implementation occurred to be safer and more efficient. 
 
 ### Code Formatting
@@ -111,14 +111,14 @@ All the code base was cleaned using the following commands:
 
 # Execution time
 
-The execution times of the tests for the unprotected and ephemeral implementations are relatively fast (less than a minute). However, the test for the static implementation takes much more time, approximately, 16-17 minutes.
-The amount of cycles might slightly differ from the results presented in the paper due to the fact the execution times are randomized (due to the protection of the inversion, for example). 
+The execution times of the tests for the unprotected and ephemeral implementations are relatively fast (less than a minute). However, the test for the static implementation takes much more time, approximately 16-17 minutes.
+The number of cycles might slightly differ from the results presented in the paper due to the fact the execution times are randomized (due to the protection of the inversion, for example). 
 Furthermore, the version of the compiler might slightly influence this amount too. 
 
 # Traces
 
-As mentioned in the paper we run our side-channel experiments using a modified Cortex-M4 (several capacitors are removed) on an STM32F407IGT6 board clocked at 168MHz. 
-The resulting comparison of traces corresponding to all three implementations is present below: 
+As mentioned in the paper, we run our side-channel experiments using a modified Cortex-M4 (several capacitors are removed) on an STM32F407IGT6 board clocked at 168MHz. 
+The resulting comparison of traces corresponding to all three implementations is presented below: 
 ![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/UnprotectedSM_mark2.png?raw=true "Unprotected Implementation")
 ![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/EphemeralSM_mark2.png?raw=true "Ephemeral Implementation")
 ![alt text](https://github.com/sca-secure-library-sca25519/sca25519/blob/main/figs/StaticSM_mark2.png?raw=true "Static Implementation")
@@ -126,7 +126,7 @@ The resulting comparison of traces corresponding to all three implementations is
 
 The scalar multiplications are marked in red. 
 
-To help reproduce the side-channel evaluation, for each of the implementations we upload 100 traces under the following link: https://www.dropbox.com/scl/fo/3zjd5m4oc77c5qgob7kxf/h?dl=0&rlkey=59774fmckgv5k8z87dbk7gpqk.
+To help reproduce the side-channel evaluation for each of the implementations, we upload 100 traces under the following link: https://www.dropbox.com/scl/fo/3zjd5m4oc77c5qgob7kxf/h?dl=0&rlkey=59774fmckgv5k8z87dbk7gpqk.
 
 The first byte of the attached data to each trace indicates the TVLA set (0 - fixed, 1 - random input and fixed key, and 2 fixed input and random key). The rest of the data corresponds to the input point and the scalar. 
 
@@ -137,7 +137,7 @@ Each trace set is in the TRS format that is described under the following links:
 - https://github.com/Riscure/java-trsfile
 - https://github.com/Riscure/Jlsca 
 
-The python `trsfile` package can be used to read the traces and it can be installed using pip: https://pypi.org/project/trsfile/. 
+The python `trsfile` package can be used to read the traces, and it can be installed using pip: https://pypi.org/project/trsfile/. 
 
 # License
 All our code is covered by CC0. `libopencm3` is licensed under GPL version 3, see https://github.com/libopencm3/libopencm3.
@@ -145,11 +145,9 @@ All our code is covered by CC0. `libopencm3` is licensed under GPL version 3, se
 
 # Running the sca25519 library (release 1.0) on ChipWhisperer
 
-On instruction how to run the code on ChipWhisperer see: [ChipWhisperer sca25519 folder](./cw/)
+On instructions how to run the code on ChipWhisperer see: [ChipWhisperer sca25519 folder](./cw/)
 
-Be aware what when running on F3 you need to use pseudorandom generator, as instructed. 
-
-To start go to 
+Be aware that when running on F3, you need to use a pseudorandom generator, as instructed. 
 
 Authors of the porting:
 - Léo Weissbart `l.weissbart@cs.ru.nl `
